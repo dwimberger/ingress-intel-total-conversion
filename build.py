@@ -303,7 +303,7 @@ if buildMobile:
 
     if buildMobile != 'copyonly':
         # now launch 'ant' to build the mobile project
-        retcode = os.system("ant %s -buildfile %s %s" % (antOptions, antBuildFile, buildMobile))
+        retcode = os.system("/Users/wimpi/Documents/Development/Tools/apache-ant-1.9.4/bin/ant %s -buildfile %s %s" % (antOptions, antBuildFile, buildMobile))
 
         if retcode != 0:
             print ("Error: mobile app failed to build. ant returned %d" % retcode)

@@ -71,10 +71,11 @@ static MainViewController *_viewController;
 
     UIBarButtonItem *settingButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_settings_applications"] style:UIBarButtonItemStylePlain target:self action:@selector(settingButtonPressed:)];
     UIBarButtonItem *locationButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_my_location"] style:UIBarButtonItemStylePlain target:self action:@selector(locationButtonPressed:)];
+    UIBarButtonItem *navigateToButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_my_navigation"] style:UIBarButtonItemStylePlain target:self action:@selector(navigateToButtonPressed:)];
     UIBarButtonItem *reloadButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reloadButtonPressed:)];
     self.navigationItem.leftBarButtonItems = @[self.backButton, menuButton];
     [self.backButton setEnabled:NO];
-    self.navigationItem.rightBarButtonItems = @[settingButton, locationButton, reloadButton];
+    self.navigationItem.rightBarButtonItems = @[settingButton, locationButton, navigateToButton ,reloadButton];
 
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.ingress.com/intel"]]];
 
@@ -136,6 +137,7 @@ static MainViewController *_viewController;
     }];
 }
 
+/*
 - (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString
 
 *))completionHandler {
@@ -155,6 +157,7 @@ static MainViewController *_viewController;
     }]];
     [self presentViewController:alertController animated:YES completion:nil];
 }
+ */
 
 - (void)bootFinished {
     IITCLocationMode mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"pref_user_location_mode"];
@@ -198,6 +201,27 @@ static MainViewController *_viewController;
     BOOL prefPersistentZoom = [defaults boolForKey:@"pref_persistent_zoom"];
     [self.webView loadJS:[NSString stringWithFormat:@"window.map.locate({setView : true%@});", prefPersistentZoom ? @", maxZoom : map.getZoom()" : @""]];
 }
+
+- (void)navigateToButtonPressed:(id)aa {
+    NSString *latLong = [self.webView stringByEvaluatingJavaScriptFromString:@"(window.portals[selectedPortal].options.data.latE6)/1000000 +','+(window.portals[selectedPortal].options.data.lngE6)/1000000;"];
+    NSLog(@"Latlong=%@", latLong);
+    if(latLong) {
+        NSString *navUrl = [NSString stringWithFormat:@"maps://maps.apple.com/?daddr=%@&dirflg=d&t=h",latLong];
+        if ([navUrl hasPrefix:@"maps"]) {
+            NSURL *url = [NSURL URLWithString:navUrl];
+            [[UIApplication sharedApplication] openURL:url];
+        }
+    } else {
+        UIAlertView *theAlert = [[UIAlertView alloc] initWithTitle:@"Title"
+                                                           message:@"This is the message."
+                                                          delegate:self
+                                                 cancelButtonTitle:@"OK"
+                                                 otherButtonTitles:nil];
+        [theAlert show];
+    }
+}
+
+
 
 - (void)reloadButtonPressed:(id)aa {
     [self reloadIITC];

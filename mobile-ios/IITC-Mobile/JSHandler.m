@@ -41,7 +41,7 @@
             NSLog(@"%@ not implemented", function);
         }
     } else {
-        NSLog([message.body description]);
+        NSLog(@"%@",[message.body description]);
     }
 }
 

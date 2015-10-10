@@ -79,6 +79,6 @@
 }
 
 - (void)locationManager:(nonnull CLLocationManager *)manager didFailWithError:(nonnull NSError *)error {
-    NSLog([error debugDescription]);
+    NSLog(@"%@", [error debugDescription]);
 }
 @end

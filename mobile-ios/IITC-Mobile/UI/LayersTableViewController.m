@@ -160,7 +160,7 @@ static LayersTableViewController *_instance;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     BOOL changed = NO;
-    BOOL reloadNeeded = NO;
+    //BOOL reloadNeeded = NO;
     switch (indexPath.section) {
         case 0:
             switch (indexPath.row) {

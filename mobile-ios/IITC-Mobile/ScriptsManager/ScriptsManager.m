@@ -64,20 +64,37 @@ static ScriptsManager * _sharedInstance;
 }
 
 + (BOOL)copyFileToDocument {
+    NSError *error;
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    /*
     NSString *testFilePath = [(NSString *)paths[0] stringByAppendingPathComponent:@"original/.copied"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:testFilePath]) {
         return YES;
     }
     NSError *error;
-    [@"copied" writeToFile:testFilePath atomically:YES encoding:NSASCIIStringEncoding error:&error];
-    NSString *scriptsPath = [(NSString *)paths[0] stringByAppendingPathComponent:@"original"];
+   */
+    
+    NSString *scriptsPath = [(NSString *)paths[0] stringByAppendingPathComponent:@"scripts"];
     NSString *resScriptsPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"scripts"];
-    [[NSFileManager defaultManager] copyItemAtPath:resScriptsPath toPath:scriptsPath error:&error];
-    if (!error) {
+    NSLog(@"Resources (FROM) = %@", resScriptsPath);
+    NSLog(@"Resources (TO) = %@", scriptsPath);
+    if ([[NSFileManager defaultManager] fileExistsAtPath:scriptsPath]) {
+        NSLog(@"Scripts folder exists (TO)");
         return YES;
     }
-    return NO;
+    
+    [[NSFileManager defaultManager] copyItemAtPath:resScriptsPath toPath:scriptsPath error:&error];
+    if (error) {
+        NSLog(@"ERROR Copying: %@", error);
+        return NO;
+    } else {
+        //[@"copied" writeToFile:testFilePath atomically:YES encoding:NSASCIIStringEncoding error:&error];
+        if(error) {
+            NSLog(@"ERROR Copying: %@", error);
+            return NO;
+        }
+        return YES;
+    }
 }
 
 - (void)loadLocalFiles {
@@ -87,17 +104,26 @@ static ScriptsManager * _sharedInstance;
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString * documentsPath = [paths[0] stringByAppendingPathComponent:@"scripts/plugins"];
+    NSLog(@"Loading from = %@", documentsPath);
+
     NSError * error;
     NSArray * directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:documentsPath error:&error];
+    if(error) {
+        NSLog(@"ERROR loading local files %@", error);
+        return;
+    }
     for (NSString *file in directoryContents) {
         if ([file hasSuffix:@"meta.js"]) {
             continue;
         }
         NSString *js = [NSString stringWithContentsOfFile:[documentsPath stringByAppendingPathComponent:file] encoding:NSASCIIStringEncoding error:&error];
-        NSString *header = @"";
+        //NSString *header = @"";
         
         if (js != nil && [js containsString:@"==UserScript=="] && [js containsString:@"==/UserScript=="]) {
             NSDictionary *attributes = [ScriptsManager getScriptInfosFromJS:js];
+            if([@"Deleted" isEqualToString: attributes[@"category"]]) {
+                continue;                
+            }
             
             NSEntityDescription *entityDescription = [NSEntityDescription
                                                       entityForName:@"Script" inManagedObjectContext:self.document.managedObjectContext];

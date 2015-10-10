@@ -32,7 +32,7 @@
 }
 
 - (void)settingsViewController:(IASKAppSettingsViewController *)sender buttonTappedForSpecifier:(IASKSpecifier *)specifier {
-    NSLog(specifier.key);
+    NSLog(@"%@", specifier.key);
     if ([specifier.key isEqualToString:@"pref_plugins"]) {
         if (self.storyboard) {
             NSLog(@".....");

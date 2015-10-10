@@ -12,4 +12,5 @@
 - (instancetype)initWithFrame:(CGRect)frame;
 - (void)loadScripts;
 - (void)loadJS:(NSString *)js;
+- (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)script;
 @end

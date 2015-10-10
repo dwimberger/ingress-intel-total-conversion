@@ -46,58 +46,67 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"scripts/ios-hooks" ofType:@"js"];
     NSString *js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
     js = [NSString stringWithFormat:js,[[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleVersion"], [(NSString *)[[NSBundle mainBundle] objectForInfoDictionaryKey: (NSString *)kCFBundleVersionKey] integerValue]];
-
+    [self loadJS:js];
     
-    [self addJSBlock:js];
+    /* Load Touche
+     path = [[NSBundle mainBundle] pathForResource:@"scripts/touche" ofType:@"js"];
+    NSLog(@"Loading script %@", path);
+    js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
+    [self loadJS:js];
+     */
+
     path = [[NSBundle mainBundle] pathForResource:@"scripts/total-conversion-build.user" ofType:@"js"];
+    NSLog(@"Loading script %@", path);
     js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
-        [self addJSBlock:js];
+    [self loadJS:js];
+    
     path = [[NSBundle mainBundle] pathForResource:@"scripts/user-location.user" ofType:@"js"];
+    NSLog(@"Loading script %@", path);
     js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
-    [self addJSBlock:js];
+    [self loadJS:js];
+    
     NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
     NSString * pluginsPath = [resourcePath stringByAppendingPathComponent:@"scripts/plugins"];
     for (NSString *scriptPath in [[ScriptsManager sharedInstance] loadedScripts]) {
         path = [pluginsPath stringByAppendingPathComponent:scriptPath];
+        NSLog(@"Loading script %@", path);
         js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
-        [self addJSBlock:js];
+        [self loadJS:js];
     }
-}
-
-- (void)addJSBlock:(NSString *)path {
-//    NSFileManager* fileMgr = [NSFileManager defaultManager];
-//    NSString *tmpPath = [NSTemporaryDirectory()stringByAppendingPathComponent:@"www" ];
-//    NSError * error;
-//    if (![fileMgr createDirectoryAtPath:tmpPath withIntermediateDirectories:YES attributes:nil error:&error]) {
-//        NSLog(@"Couldn't create www subdirectory. error");
-//        return;
-//    }
-//    NSString  *dstPath = [tmpPath stringByAppendingPathComponent:[path lastPathComponent]];
-//    if (![fileMgr fileExistsAtPath:dstPath]) {
-//        if (![fileMgr copyItemAtPath:path toPath:dstPath error:&error]) {
-//            NSLog(@"Couldn't copy file to /tmp/. (error)");
-//            return;
-//        }
-//    }
-    
-//    [self loadFileURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://%@", path]] allowingReadAccessToURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://%@", path]]];
-////    self loadRequest:<#(nonnull NSURLRequest *)#>
-//        NSString *temp =[NSString stringWithFormat:@"var script = document.createElement('script');script.src = \"file://%@\";document.body.appendChild(script);", dstPath];
-//    NSLog(temp);
-
-    [self evaluateJavaScript:path completionHandler:^(id result, NSError * error) {
-        if (error) {
-            NSLog([error description]);
-        }
-    }];
 }
 
 - (void)loadJS:(NSString *)js {
     [self evaluateJavaScript:js completionHandler:^(id result, NSError * error) {
         if (error) {
-            NSLog([error description]);
+            NSLog(@"evaluateJavaScript error: %@", error);
+//            NSLog(@"%@ \n\n --- SCRIPT ---\n\n%@\n\n------\n\n", [error description], js);
         }
     }];
 }
+
+- (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)script
+{
+    __block NSString *resultString = nil;
+    __block BOOL finished = NO;
+    
+    [self evaluateJavaScript:script completionHandler:^(id result, NSError *error) {
+        if (error == nil) {
+            if (result != nil) {
+                resultString = [NSString stringWithFormat:@"%@", result];
+            }
+        } else {
+            NSLog(@"evaluateJavaScript error : %@", error.localizedDescription);
+        }
+        finished = YES;
+    }];
+    
+    while (!finished)
+    {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+    }
+    
+    return resultString;
+}
+
 
 @end
