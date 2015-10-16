@@ -48,11 +48,15 @@
 // open dialog to send geo intent for navigation apps like gmaps or waze etc...
 
 - (void)intentPosLink:(NSArray *)args {
+    return;
+    /*
     NSNumber *isPortal = args[4];
     NSString *lat = args[0];
     NSString *lng = args[1];
     
     NSNumber *zoom = args[2];
+    
+    
     
     NSURL *url;
     if ([isPortal boolValue]) {
@@ -65,11 +69,13 @@
 //    NSString *title = args[3];
 //
     
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:JSNotificationSharedAction object:self userInfo:@{@"data":@[args[3],  url]}];
 //    mIitc.startActivity(ShareActivity.forPosition(mIitc, lat, lng, zoom, title, isPortal));
+     */
 }
 
-// share a string to the IITC share activity. only uses the share tab.
+// U a string to the IITC share activity. only uses the share tab.
 
 - (void)shareString:(NSString *) str {
     [[NSNotificationCenter defaultCenter] postNotificationName:JSNotificationSharedAction object:self userInfo:@{@"data":@[str]}];
@@ -99,9 +105,9 @@
 //}
 
 
-//- (void) dialogOpened:(NSString *) dialogID withResult:(BOOL) open {
-////    mIitc.dialogOpened(id, open);
-//}
+- (void) dialogOpened:(NSString *) dialogID withResult:(BOOL) open {
+    NSLog(@"dialogOpened");
+}
 
 
 - (void) bootFinished {

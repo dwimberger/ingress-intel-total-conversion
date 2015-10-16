@@ -46,14 +46,8 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"scripts/ios-hooks" ofType:@"js"];
     NSString *js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
     js = [NSString stringWithFormat:js,[[NSBundle mainBundle] objectForInfoDictionaryKey: @"CFBundleVersion"], [(NSString *)[[NSBundle mainBundle] objectForInfoDictionaryKey: (NSString *)kCFBundleVersionKey] integerValue]];
+
     [self loadJS:js];
-    
-    /* Load Touche
-     path = [[NSBundle mainBundle] pathForResource:@"scripts/touche" ofType:@"js"];
-    NSLog(@"Loading script %@", path);
-    js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
-    [self loadJS:js];
-     */
 
     path = [[NSBundle mainBundle] pathForResource:@"scripts/total-conversion-build.user" ofType:@"js"];
     NSLog(@"Loading script %@", path);
@@ -73,6 +67,9 @@
         js = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
         [self loadJS:js];
     }
+    
+    
+    
 }
 
 - (void)loadJS:(NSString *)js {

@@ -11,7 +11,7 @@
 
 @class IITCWebView;
 
-@interface MainViewController : UIViewController <WKUIDelegate, UIPopoverControllerDelegate>
+@interface MainViewController : UIViewController <WKUIDelegate, WKNavigationDelegate, UIPopoverControllerDelegate>
 + (instancetype)sharedInstance;
 
 @property(strong, nonatomic) IITCWebView *webView;

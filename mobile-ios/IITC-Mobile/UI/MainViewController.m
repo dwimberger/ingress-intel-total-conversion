@@ -77,6 +77,7 @@ static MainViewController *_viewController;
     [self.backButton setEnabled:NO];
     self.navigationItem.rightBarButtonItems = @[settingButton, locationButton, navigateToButton ,reloadButton];
 
+    //Load request
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.ingress.com/intel"]]];
 
 }
@@ -101,14 +102,7 @@ static MainViewController *_viewController;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"estimatedProgress"]) {
         double progress = self.webView.estimatedProgress;
-        if (progress >= 0.8) {
-            if ([self.webView.URL.host containsString:@"ingress"] && self.loadIITCNeeded) {
-                [self.webView loadScripts];
-                self.loadIITCNeeded = NO;
-            }
-
-        }
-
+     
         [self.webProgressView setProgress:progress animated:YES];
         if (progress == 1.0) {
             [UIView animateWithDuration:1 animations:^{
@@ -158,6 +152,22 @@ static MainViewController *_viewController;
     [self presentViewController:alertController animated:YES completion:nil];
 }
  */
+
+- (void)webView:(WKWebView *)wkWebView didFinishNavigation:(WKNavigation *)navigation {
+    NSLog(@"didFinishNavigation %@", self.webView.URL.absoluteString);
+    if([self.webView.URL.host containsString:@"ingress"]) {
+        NSString *query = @"document.querySelector('#dashboard_container h2')? document.querySelector('#dashboard_container h2').textContent:'BQAS';";
+        NSString *result = [self.webView stringByEvaluatingJavaScriptFromString:query];
+        NSLog(@"Result %@", result);
+        if (![result isEqualToString:@"Welcome to Ingress."] && self.loadIITCNeeded) {
+            NSLog(@"didFinishNavigation Loading Scripts");
+            [self.webView loadScripts];
+            self.loadIITCNeeded = NO;
+        }
+    
+    }
+    
+}
 
 - (void)bootFinished {
     IITCLocationMode mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"pref_user_location_mode"];
@@ -212,8 +222,8 @@ static MainViewController *_viewController;
             [[UIApplication sharedApplication] openURL:url];
         }
     } else {
-        UIAlertView *theAlert = [[UIAlertView alloc] initWithTitle:@"Title"
-                                                           message:@"This is the message."
+        UIAlertView *theAlert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                           message:@"No portal selected."
                                                           delegate:self
                                                  cancelButtonTitle:@"OK"
                                                  otherButtonTitles:nil];
@@ -239,7 +249,7 @@ static MainViewController *_viewController;
 
     // map pane is top-lvl. clear stack.
     if ([pane isEqualToString:@"map"]) {
-        self.backPane.removeAllObjects;
+        [self.backPane removeAllObjects];
     }
         // don't push current pane to backstack if this method was called via back button
     else if (!self.backButtonPressed) {
